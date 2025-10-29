@@ -1,50 +1,44 @@
 import Product from "../models/Product.js";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
-
 dotenv.config();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname.replace(
-      /\s+/g,
-      "_"
-    )}`;
-    cb(null, uniqueName);
+//  Cloudinary Config
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+//  Multer Storage (Cloudinary)
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "localkart_products", 
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const allowed = /jpeg|jpg|png|webp/;
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.test(ext)) cb(null, true);
-  else cb(new Error("Only image files (jpeg, jpg, png, webp) are allowed"));
-};
+const upload = multer({ storage });
 
-const upload = multer({ storage, fileFilter });
-
-// Helper: Base URL
+//  Base URL
 const BASE_URL =
   process.env.BASE_URL?.replace(/\/$/, "") || "http://localhost:5000";
 
+
+//  CREATE Product
 const createProduct = async (req, res) => {
   try {
     const { categoryId, subCategoryId, name, quantity, mrp } = req.body;
-
     if (!categoryId || !subCategoryId || !name) {
       return res
         .status(400)
         .json({ message: "Please provide all required fields" });
     }
 
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const imageUrl = req.file ? req.file.path : null;
 
     const product = await Product.create({
       categoryId,
@@ -52,12 +46,12 @@ const createProduct = async (req, res) => {
       name,
       quantity,
       mrp,
-      image: imagePath,
+      image: imageUrl,
     });
 
     res.status(201).json({
       ...product.toObject(),
-      imageUrl: imagePath ? `${BASE_URL}${imagePath}` : null,
+      imageUrl,
     });
   } catch (err) {
     console.error(" Error creating product:", err);
@@ -65,6 +59,7 @@ const createProduct = async (req, res) => {
   }
 };
 
+//  GET Products
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find()
@@ -73,32 +68,33 @@ const getProducts = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const formatted = products.map((p) => ({
-      ...p,
-      imageUrl: p.image ? `${BASE_URL}${p.image}` : null,
-    }));
-
-    res.json(formatted);
+    res.json(products);
   } catch (err) {
     console.error(" Error fetching products:", err);
     res.status(500).json({ message: "Server error while fetching products" });
   }
 };
 
+//  UPDATE Product
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, quantity, mrp, categoryId, subCategoryId } = req.body;
-
     const product = await Product.findById(id);
+
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // Replace image if new one uploaded
+    // 🖼 If new image uploaded, delete old from Cloudinary
     if (req.file) {
-      if (product.image && fs.existsSync(`.${product.image}`)) {
-        fs.unlinkSync(`.${product.image}`);
+      if (product.image) {
+        const publicId = product.image
+          .split("/")
+          .slice(-2)
+          .join("/")
+          .split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
       }
-      product.image = `/uploads/${req.file.filename}`;
+      product.image = req.file.path;
     }
 
     if (name) product.name = name;
@@ -111,7 +107,7 @@ const updateProduct = async (req, res) => {
 
     res.json({
       ...product.toObject(),
-      imageUrl: product.image ? `${BASE_URL}${product.image}` : null,
+      imageUrl: product.image,
     });
   } catch (err) {
     console.error(" Error updating product:", err);
@@ -119,21 +115,27 @@ const updateProduct = async (req, res) => {
   }
 };
 
+//  DELETE Product
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // Delete image file
-    if (product.image && fs.existsSync(`.${product.image}`)) {
-      fs.unlinkSync(`.${product.image}`);
+    // 🗑 Delete image from Cloudinary
+    if (product.image) {
+      const publicId = product.image
+        .split("/")
+        .slice(-2)
+        .join("/")
+        .split(".")[0];
+      await cloudinary.uploader.destroy(publicId);
     }
 
     await product.deleteOne();
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
-    console.error(" Error deleting product:", err);
+    console.error("Error deleting product:", err);
     res.status(500).json({ message: "Server error while deleting product" });
   }
 };
