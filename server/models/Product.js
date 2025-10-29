@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema(
       min: [0, "MRP must be a positive number"],
     },
     image: {
-      type: String,
+      type: String, 
       default: null,
     },
   },
@@ -39,11 +39,16 @@ productSchema.index({ name: 1, categoryId: 1 });
 
 productSchema.virtual("imageUrl").get(function () {
   if (!this.image) return null;
+
+  if (this.image.startsWith("http")) return this.image;
+ 
   const base = process.env.BASE_URL || "http://localhost:5000";
   return `${base}${this.image.startsWith("/") ? this.image : `/${this.image}`}`;
 });
 
+
 productSchema.set("toJSON", { virtuals: true });
 productSchema.set("toObject", { virtuals: true });
 
-export default mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+export default Product;
