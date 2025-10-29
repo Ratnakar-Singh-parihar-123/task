@@ -1,6 +1,6 @@
-import Category from "../models/category.js";
-import SubCategory from "../models/subCategory.js";
-import Product from "../models/Product.js";
+import Category from "../models/Category.js";
+import SubCategory from "../models/SubCategory.js";
+import Product from "../models/product.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
