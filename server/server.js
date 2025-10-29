@@ -23,20 +23,16 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/dashboard-stats", dashboardRoutes);
 
-
 app.get("/", (req, res) => {
   res.send(" API is running successfully...");
 });
-
 
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route not found" });
