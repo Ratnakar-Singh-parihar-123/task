@@ -11,7 +11,7 @@ import {
 
 export default function Sidebar() {
   const loc = useLocation();
-  const [open, setOpen] = useState(false); // Mobile toggle
+  const [open, setOpen] = useState(false);
 
   const linkClass = (path) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -22,20 +22,19 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Top Bar */}
+      {/*  Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between bg-gray-900 text-white px-4 py-3 shadow">
+        <h1 className="text-lg font-semibold">Task Panel</h1>
         <button onClick={() => setOpen(true)}>
           <Menu size={24} />
         </button>
-        <h1 className="text-lg font-semibold">Task Panel</h1>
       </div>
 
-      {/* Sidebar */}
+      {/*  Sidebar (Right-side Drawer) */}
       <aside
-        className={`fixed md:static top-0 left-0 h-full bg-gray-900 text-white z-50 flex flex-col transition-all duration-300
-          ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
-          ${open ? "w-64" : "md:w-64 w-64"}
-        `}
+        className={`fixed md:static top-0 right-0 h-full bg-gray-900 text-white z-50 flex flex-col transition-transform duration-300
+          ${open ? "translate-x-0" : "translate-x-full"} md:translate-x-0
+          w-64`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
@@ -50,7 +49,11 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          <Link className={linkClass("/")} to="/" onClick={() => setOpen(false)}>
+          <Link
+            className={linkClass("/")}
+            to="/"
+            onClick={() => setOpen(false)}
+          >
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
           </Link>
@@ -89,7 +92,7 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Overlay for Mobile */}
+      {/*  Overlay (for mobile) */}
       {open && (
         <div
           onClick={() => setOpen(false)}

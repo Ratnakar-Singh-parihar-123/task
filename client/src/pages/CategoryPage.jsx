@@ -10,14 +10,12 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // 🔹 Fetch all categories
+  //  Fetch all categories
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_BASE}/categories`);
-      console.log("Fetched Categories:", res.data);
-      const allCategories = Array.isArray(res.data.data) ? res.data.data : [];
-      setCategories(allCategories);
+      setCategories(Array.isArray(res.data.data) ? res.data.data : []);
     } catch (err) {
       console.error("Error fetching categories:", err);
       toast.error("Failed to load categories!");
@@ -30,7 +28,7 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
-  // 🔹 Add category
+  //  Add category
   const addCategory = async (e) => {
     e.preventDefault();
     if (!name.trim()) return toast.warn("Please enter a category name!");
@@ -48,7 +46,7 @@ export default function CategoryPage() {
     }
   };
 
-  // 🔹 Delete category
+  //  Delete category
   const deleteCategory = async (id) => {
     if (!window.confirm("Delete this category?")) return;
     try {
@@ -62,47 +60,46 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6">
-      <h2 className="text-2xl sm:text-3xl font-semibold mb-6 flex items-center gap-2 text-gray-800">
-        <PlusCircle className="w-6 h-6 text-blue-600" />
+    <div className="max-w-2xl mx-auto p-4 sm:p-6">
+      <h2 className="text-xl sm:text-2xl font-semibold mb-5 flex items-center gap-2 text-gray-800">
+        <PlusCircle className="w-5 h-5 text-blue-600" />
         Manage Categories
       </h2>
 
-      {/* Add Category Form */}
+      {/*  Add Category Form */}
       <form
         onSubmit={addCategory}
-        className="bg-white p-4 sm:p-6 rounded-2xl shadow-md mb-8 border border-gray-100 flex flex-col sm:flex-row gap-3"
+        className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col sm:flex-row gap-3"
       >
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none flex-1 w-full"
-          placeholder="Enter category name"
+          className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none flex-1 text-sm sm:text-base"
+          placeholder="Enter category name..."
         />
-
         <button
           type="submit"
           disabled={creating}
-          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 sm:px-5 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base disabled:opacity-60"
         >
           {creating ? (
             <>
-              <Loader2 className="animate-spin w-5 h-5" />
+              <Loader2 className="animate-spin w-4 h-4" />
               <span>Adding...</span>
             </>
           ) : (
             <>
-              <PlusCircle size={18} />
-              <span>Add Category</span>
+              <PlusCircle size={16} />
+              <span>Add</span>
             </>
           )}
         </button>
       </form>
 
-      {/* Category List */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-md border border-gray-100">
-        <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
-          Category List
+      {/*  Category List */}
+      <div className="bg-white mt-6 p-4 rounded-xl shadow-sm border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">
+          Categories
         </h3>
 
         {loading ? (
@@ -110,26 +107,26 @@ export default function CategoryPage() {
             <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
           </div>
         ) : categories.length === 0 ? (
-          <p className="text-gray-600 text-center py-6 text-sm sm:text-base">
+          <p className="text-gray-500 text-center py-6 text-sm">
             No categories found.
           </p>
         ) : (
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-gray-100">
             {categories.map((c) => (
               <li
                 key={c._id}
-                className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3 px-2 hover:bg-gray-50 transition rounded-lg gap-2"
+                className="flex justify-between items-center py-3 px-2 hover:bg-gray-50 rounded-md transition text-sm sm:text-base"
               >
-                <span className="font-medium text-gray-800 break-words text-sm sm:text-base">
+                <span className="text-gray-800 font-medium break-words">
                   {c.name}
                 </span>
                 <button
                   onClick={() => deleteCategory(c._id)}
-                  className="text-red-600 hover:text-red-800 transition flex items-center gap-1 text-sm sm:text-base"
+                  className="text-red-600 hover:text-red-800 transition flex items-center gap-1"
                   title="Delete Category"
                 >
-                  <Trash2 size={18} />
-                  <span className="sm:hidden">Delete</span>
+                  <Trash2 size={16} />
+                  <span className="hidden sm:inline">Delete</span>
                 </button>
               </li>
             ))}
