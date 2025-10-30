@@ -11,14 +11,12 @@ export default function SubCategoryPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const userId = localStorage.getItem("userId");
 
-  const userId = localStorage.getItem("userId"); 
-
-  //  Fetch Categories
+  // Fetch Categories
   const fetchCategories = async () => {
     try {
       const res = await axios.get(`${API_BASE}/categories`);
-     
       const categoryData = Array.isArray(res.data.data)
         ? res.data.data
         : Array.isArray(res.data)
@@ -27,11 +25,11 @@ export default function SubCategoryPage() {
       setCategories(categoryData);
     } catch (err) {
       console.error("Error fetching categories:", err);
-      toast.error(" Failed to load categories");
+      toast.error("Failed to load categories");
     }
   };
 
-  //  Fetch Subcategories
+  // Fetch Subcategories
   const fetchSubCategories = async () => {
     setLoading(true);
     try {
@@ -41,16 +39,13 @@ export default function SubCategoryPage() {
         : Array.isArray(res.data)
         ? res.data
         : [];
-
-      //  If backend returns subcategories populated with category info
       const mySubs = userId
         ? subData.filter((s) => String(s.createdBy) === String(userId))
         : subData;
-
       setSubCategories(mySubs);
     } catch (err) {
       console.error("Error fetching subcategories:", err);
-      toast.error(" Failed to load subcategories");
+      toast.error("Failed to load subcategories");
     } finally {
       setLoading(false);
     }
@@ -61,15 +56,13 @@ export default function SubCategoryPage() {
     fetchSubCategories();
   }, []);
 
-  //  Add Subcategory
+  // Add Subcategory
   const addSubCategory = async (e) => {
     e.preventDefault();
-
     if (!selectedCategory || !name.trim()) {
-      toast.warn(" Please select a category and enter a subcategory name!");
+      toast.warn("Please select a category and enter a subcategory name!");
       return;
     }
-
     setCreating(true);
     try {
       await axios.post(`${API_BASE}/subcategories`, {
@@ -77,44 +70,44 @@ export default function SubCategoryPage() {
         categoryId: selectedCategory,
         createdBy: userId,
       });
-      toast.success(" Subcategory added successfully!");
+      toast.success("Subcategory added successfully!");
       setName("");
       setSelectedCategory("");
       fetchSubCategories();
     } catch (err) {
       console.error("Error adding subcategory:", err);
-      toast.error(" Failed to add subcategory!");
+      toast.error("Failed to add subcategory!");
     } finally {
       setCreating(false);
     }
   };
 
-  //  Delete Subcategory
+  // Delete Subcategory
   const deleteSubCategory = async (id) => {
     if (!window.confirm("🗑️ Delete this subcategory?")) return;
     try {
       await axios.delete(`${API_BASE}/subcategories/${id}`);
-      toast.success(" Subcategory deleted!");
+      toast.success("Subcategory deleted!");
       fetchSubCategories();
     } catch (err) {
       console.error("Error deleting subcategory:", err);
-      toast.error(" Failed to delete subcategory!");
+      toast.error("Failed to delete subcategory!");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-3xl font-semibold mb-6 flex items-center gap-2">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+      <h2 className="text-2xl sm:text-3xl font-semibold mb-6 flex items-center gap-2 text-gray-800">
         <PlusCircle className="w-6 h-6 text-blue-600" />
         Manage Subcategories
       </h2>
 
-      
+      {/* Add Subcategory Form */}
       <form
         onSubmit={addSubCategory}
-        className="bg-white p-6 rounded-2xl shadow-md mb-8 border border-gray-100"
+        className="bg-white p-4 sm:p-6 rounded-2xl shadow-md mb-8 border border-gray-100 space-y-4"
       >
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Category Dropdown */}
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">
@@ -138,7 +131,7 @@ export default function SubCategoryPage() {
             </select>
           </div>
 
-          {/* Subcategory */}
+          {/* Subcategory Input */}
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">
               Subcategory Name
@@ -155,7 +148,7 @@ export default function SubCategoryPage() {
         <button
           type="submit"
           disabled={creating}
-          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-60"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-60"
         >
           {creating ? (
             <Loader2 className="animate-spin w-5 h-5" />
@@ -166,9 +159,10 @@ export default function SubCategoryPage() {
         </button>
       </form>
 
-      {/*  Subcategory List */}
+      {/* Subcategory List */}
       <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
         <h3 className="text-xl font-semibold mb-4">Subcategory List</h3>
+
         {loading ? (
           <div className="flex justify-center py-6">
             <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
@@ -182,17 +176,17 @@ export default function SubCategoryPage() {
             {subCategories.map((s) => (
               <li
                 key={s._id}
-                className="flex justify-between items-center py-3 px-2 hover:bg-gray-50 transition rounded-lg"
+                className="flex flex-col sm:flex-row justify-between sm:items-center py-3 px-2 hover:bg-gray-50 transition rounded-lg"
               >
-                <div>
+                <div className="text-center sm:text-left">
                   <span className="font-medium text-gray-800">{s.name}</span>
-                  <span className="text-sm text-gray-500 ml-2">
+                  <span className="text-sm text-gray-500 ml-1">
                     ({s.categoryId?.name || "No category"})
                   </span>
                 </div>
                 <button
                   onClick={() => deleteSubCategory(s._id)}
-                  className="text-red-600 hover:text-red-800 transition"
+                  className="mt-2 sm:mt-0 text-red-600 hover:text-red-800 transition self-center"
                   title="Delete Subcategory"
                 >
                   <Trash2 size={18} />

@@ -16,7 +16,6 @@ function ProductPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Default Data
   const defaultCategories = [
     { name: "Clothing" },
     { name: "Footwear" },
@@ -47,7 +46,6 @@ function ProductPage() {
     }
   };
 
-  // Fetch all
   const fetchProducts = async () => {
     const res = await fetch(`${API_BASE}/products`);
     const data = await safeJson(res);
@@ -95,11 +93,11 @@ function ProductPage() {
     fetchProducts();
     fetchCategories();
   }, []);
+
   useEffect(() => {
     if (categories.length > 0) fetchSubcategories();
   }, [categories]);
 
-  // Add Product
   const addProduct = async (e) => {
     e.preventDefault();
     const fd = new FormData();
@@ -116,7 +114,6 @@ function ProductPage() {
     fetchProducts();
   };
 
-  // Edit Product
   const openEditModal = (product) => {
     setEditingProduct(product);
     setForm({
@@ -143,7 +140,6 @@ function ProductPage() {
     fetchProducts();
   };
 
-  // Delete Product
   const del = async (id) => {
     if (!window.confirm("Delete this product?")) return;
     await fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
@@ -151,26 +147,29 @@ function ProductPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">🛍️ Manage Products</h2>
+    <div className="max-w-6xl mx-auto px-3 sm:px-6">
+      <h2 className="text-2xl sm:text-3xl font-semibold mb-4 text-gray-800">
+        🛍️ Manage Products
+      </h2>
 
-      {/* Add Product */}
+      {/* Add Product Form */}
       <form
         onSubmit={addProduct}
-        className="bg-white p-6 rounded shadow mb-6 space-y-3"
+        className="bg-white p-4 sm:p-6 rounded-2xl shadow mb-8 space-y-4 border border-gray-100"
       >
         <input
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder="Product Name"
-          className="border p-2 w-full rounded"
+          className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           required
         />
-        <div className="grid grid-cols-2 gap-3">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <select
             value={form.categoryId}
             onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-            className="border p-2 rounded"
+            className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           >
             <option value="">Select Category</option>
@@ -186,7 +185,7 @@ function ProductPage() {
             onChange={(e) =>
               setForm({ ...form, subCategoryId: e.target.value })
             }
-            className="border p-2 rounded"
+            className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           >
             <option value="">Select Subcategory</option>
@@ -200,13 +199,13 @@ function ProductPage() {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input
             value={form.mrp}
             onChange={(e) => setForm({ ...form, mrp: e.target.value })}
             placeholder="MRP"
             type="number"
-            className="border p-2 rounded"
+            className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           />
           <input
@@ -214,7 +213,7 @@ function ProductPage() {
             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
             placeholder="Quantity"
             type="number"
-            className="border p-2 rounded"
+            className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             required
           />
         </div>
@@ -222,21 +221,21 @@ function ProductPage() {
         <input
           type="file"
           onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
-          className="border p-2 rounded w-full"
+          className="border border-gray-300 p-2 rounded-lg w-full"
           accept="image/*"
         />
 
-        <button className="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+        <button className="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
           ➕ Add Product
         </button>
       </form>
 
       {/* Product Grid */}
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {products.map((p) => (
           <div
             key={p._id}
-            className="bg-white rounded shadow overflow-hidden relative group"
+            className="bg-white rounded-2xl shadow-md hover:shadow-lg transition overflow-hidden relative group"
           >
             {p.image ? (
               <img
@@ -246,40 +245,37 @@ function ProductPage() {
                     : `${UPLOAD_BASE}${p.image}`
                 }
                 alt={p.name}
-                className="h-40 w-full object-cover"
+                className="h-44 sm:h-48 w-full object-cover"
                 onError={(e) => {
                   e.target.src = "https://via.placeholder.com/150";
                 }}
               />
             ) : (
-              <div className="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+              <div className="h-44 sm:h-48 bg-gray-200 flex items-center justify-center text-gray-500">
                 No Image
               </div>
             )}
-
-            <div className="p-3">
-              <h3 className="font-semibold">{p.name}</h3>
-              <p className="text-sm text-gray-600">
+            <div className="p-4 space-y-1">
+              <h3 className="font-semibold text-gray-800 truncate">{p.name}</h3>
+              <p className="text-sm text-gray-600 truncate">
                 {p.categoryId?.name} / {p.subCategoryId?.name}
               </p>
               <div className="flex justify-between items-center mt-2">
                 <span className="font-bold text-blue-600">₹{p.mrp}</span>
-                <span className="text-sm text-gray-600">
-                  Qty: {p.quantity}
-                </span>
+                <span className="text-sm text-gray-600">Qty: {p.quantity}</span>
               </div>
             </div>
 
-            <div className="absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition">
+            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
               <button
                 onClick={() => openEditModal(p)}
-                className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                className="bg-yellow-500 text-white px-3 py-1 rounded-md text-sm hover:bg-yellow-600"
               >
                 ✏️ Edit
               </button>
               <button
                 onClick={() => del(p._id)}
-                className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700"
               >
                 🗑 Delete
               </button>
@@ -290,8 +286,8 @@ function ProductPage() {
 
       {/* Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
+          <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">✏️ Edit Product</h2>
             <form onSubmit={updateProduct} className="space-y-3">
               <input
@@ -301,7 +297,7 @@ function ProductPage() {
                 className="border p-2 w-full rounded"
               />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <select
                   value={form.categoryId}
                   onChange={(e) =>
@@ -353,13 +349,11 @@ function ProductPage() {
 
               <input
                 type="file"
-                onChange={(e) =>
-                  setForm({ ...form, image: e.target.files[0] })
-                }
+                onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
                 className="border p-2 w-full rounded"
               />
 
-              <div className="flex justify-end space-x-3 mt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
