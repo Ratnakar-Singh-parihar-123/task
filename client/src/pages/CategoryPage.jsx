@@ -10,29 +10,17 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const userId = localStorage.getItem("userId");
-
-  // ✅ Safe array extractor
-  const safeArray = (res) => {
-    if (!res) return [];
-    if (Array.isArray(res)) return res;
-    if (Array.isArray(res.data)) return res.data;
-    if (Array.isArray(res.categories)) return res.categories;
-    return [];
-  };
-
-  // 🔹 Fetch categories
+  // 🔹 Fetch all categories
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${API_BASE}/categories`);
-      const allCategories = safeArray(res.data);
-
-      const myCategories = allCategories.filter(
-        (cat) => String(cat.createdBy) === String(userId)
-      );
-
-      setCategories(myCategories);
+      const allCategories = Array.isArray(res.data.data)
+        ? res.data.data
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
+      setCategories(allCategories);
     } catch (err) {
       console.error("Error fetching categories:", err);
       toast.error("❌ Failed to load categories!");
@@ -48,14 +36,14 @@ export default function CategoryPage() {
   // 🔹 Add category
   const addCategory = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return toast.warn("⚠️ Please enter a category name!");
+    if (!name.trim()) {
+      toast.warn(" Please enter a category name!");
+      return;
+    }
     setCreating(true);
     try {
-      await axios.post(`${API_BASE}/categories`, {
-        name,
-        createdBy: userId,
-      });
-      toast.success("✅ Category added successfully!");
+      await axios.post(`${API_BASE}/categories`, { name: name.trim() });
+      toast.success(" Category added successfully!");
       setName("");
       fetchCategories();
     } catch (err) {
@@ -68,10 +56,10 @@ export default function CategoryPage() {
 
   // 🔹 Delete category
   const deleteCategory = async (id) => {
-    if (!window.confirm("🗑️ Delete this category?")) return;
+    if (!window.confirm("🗑️ Are you sure you want to delete this category?")) return;
     try {
       await axios.delete(`${API_BASE}/categories/${id}`);
-      toast.success("✅ Category deleted!");
+      toast.success("🗑️ Category deleted!");
       fetchCategories();
     } catch (err) {
       console.error("Error deleting category:", err);
@@ -81,12 +69,13 @@ export default function CategoryPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-3xl font-semibold mb-6 flex items-center gap-2">
-        <PlusCircle className="w-6 h-6 text-blue-600" />
+      {/* Header */}
+      <h2 className="text-3xl font-semibold mb-6 flex items-center gap-2 text-gray-800">
+        <PlusCircle className="w-7 h-7 text-blue-600" />
         Manage Categories
       </h2>
 
-      {/* Add Category Form */}
+      {/*  Add Category Form */}
       <form
         onSubmit={addCategory}
         className="bg-white p-6 rounded-2xl shadow-md mb-8 border border-gray-100 flex flex-col sm:flex-row gap-3"
@@ -103,26 +92,27 @@ export default function CategoryPage() {
           className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-60"
         >
           {creating ? (
-            <Loader2 className="animate-spin w-5 h-5" />
+            <>
+              <Loader2 className="animate-spin w-5 h-5" /> Adding...
+            </>
           ) : (
-            <PlusCircle size={18} />
+            <>
+              <PlusCircle size={18} /> Add Category
+            </>
           )}
-          {creating ? "Adding..." : "Add Category"}
         </button>
       </form>
 
-      {/* Category List */}
+      {/*  Category List */}
       <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
-        <h3 className="text-xl font-semibold mb-4">Category List</h3>
+        <h3 className="text-xl font-semibold mb-4 text-gray-800">Category List</h3>
 
         {loading ? (
           <div className="flex justify-center py-6">
             <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
           </div>
         ) : categories.length === 0 ? (
-          <p className="text-gray-600 text-center py-6">
-            No categories found.
-          </p>
+          <p className="text-gray-600 text-center py-6">No categories found.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
             {categories.map((c) => (

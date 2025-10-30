@@ -48,14 +48,14 @@ export default function ProductPage() {
     }
   };
 
-  // ✅ Fetch products
+  //  Fetch products
   const fetchProducts = async () => {
     const res = await fetch(`${API_BASE}/products`);
     const data = await safeJson(res);
     setProducts(data);
   };
 
-  // ✅ Fetch categories
+  //  Fetch categories
   const fetchCategories = async () => {
     const res = await fetch(`${API_BASE}/categories`);
     let data = await safeJson(res);
@@ -74,7 +74,7 @@ export default function ProductPage() {
     setCategories(data);
   };
 
-  // ✅ Fetch subcategories
+  //  Fetch subcategories
   const fetchSubcategories = async () => {
     const res = await fetch(`${API_BASE}/subcategories`);
     let data = await safeJson(res);
@@ -105,7 +105,7 @@ export default function ProductPage() {
     if (categories.length > 0) fetchSubcategories();
   }, [categories]);
 
-  // ✅ Add product
+  //  Add product
   const addProduct = async (e) => {
     e.preventDefault();
     const fd = new FormData();
@@ -124,7 +124,7 @@ export default function ProductPage() {
     fetchProducts();
   };
 
-  // ✅ Open edit modal
+  //  Open edit modal
   const openEditModal = (product) => {
     setEditingProduct(product);
     setForm({
@@ -138,7 +138,7 @@ export default function ProductPage() {
     setShowModal(true);
   };
 
-  // ✅ Update product
+  //  Update product
   const updateProduct = async (e) => {
     e.preventDefault();
     const fd = new FormData();
@@ -154,7 +154,7 @@ export default function ProductPage() {
     fetchProducts();
   };
 
-  // ✅ Delete product
+  //  Delete product
   const del = async (id) => {
     if (!window.confirm("Delete this product?")) return;
     await fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
@@ -168,7 +168,7 @@ export default function ProductPage() {
         🛍️ Manage Products
       </h2>
 
-      {/* ✅ Add Product Form */}
+      {/*  Add Product Form */}
       <form
         onSubmit={addProduct}
         className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-3"
@@ -244,7 +244,7 @@ export default function ProductPage() {
         </button>
       </form>
 
-      {/* ✅ Product Grid */}
+      {/*  Product Grid */}
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8">
         {products.map((p) => (
           <div
@@ -302,7 +302,7 @@ export default function ProductPage() {
         ))}
       </div>
 
-      {/* ✅ Edit Modal */}
+      {/*  Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
