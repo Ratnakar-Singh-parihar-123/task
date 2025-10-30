@@ -52,7 +52,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="p-4 text-center text-xs text-gray-500 border-t border-gray-800">
-        {open && "© 2025 task.."}
+        {open && "© 2025 task"}
       </div>
     </aside>
   );
